@@ -1,49 +1,82 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+-- import Data.Text.Encoding
+-- import qualified Data.Text as T
+-- import System.IO
 import Data.Aeson
 import Data.List
 import Data.Maybe
-import Data.Text
+-- import qualified Data.Sequence
 import Data.Time
 import Data.Time.Calendar
 import GHC.Generics
+import qualified Data.ByteString.Char8 as C8
 import qualified Data.ByteString.Lazy as B
 import System.Directory
 import System.Environment
-import System.IO
 
-getJSON :: FilePath -> IO B.ByteString
-getJSON = B.readFile
-
-data Habit = Habit { name :: Text
+data Habit = Habit { name :: String
                    , occurences :: [Day]
                    } deriving (Generic, Show)
 
+instance Eq Habit where
+    x == y = name x == name y
+
+instance Ord Habit where
+    compare x y = compare (name x) (name y)
+
 instance FromJSON Habit
 instance ToJSON Habit
-
-dispatch :: [(String, [String] -> IO ())]
-dispatch =  [ ("view", view) ]
 
 main = do
     (command:args) <- getArgs
     let (Just action) = lookup command dispatch
     action args
 
+getJSON :: FilePath -> IO B.ByteString
+getJSON = B.readFile
+
+dispatch :: [(String, [String] -> IO ())]
+dispatch =  [ ("view", view)
+            , ("add", add)
+            , ("mark", mark)
+            ]
+
 view :: [String] -> IO ()
 view [fileName] = do
-    -- Get JSON data and decode it
     d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
-    -- If d is Left, the JSON was malformed.
-    -- In that case, we report the error.
-    -- Otherwise, we perform the operation of
-    -- our choice. In this case, just print it.
     case d of
         Left err -> putStrLn err
-        Right ps -> do
-            today <- getToday
-            print (Prelude.map (getHabitScore today) ps)
+        Right hs -> print hs
+
+add :: [String] -> IO ()
+add [fileName, habitName] = do
+    d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
+    case d of
+        Left err -> putStrLn err
+        Right hs -> do
+            let newHabit = Habit { name = habitName, occurences = [] }
+            if newHabit `elem` hs
+                then putStrLn "Habit already exists"
+                else B.writeFile fileName (encode newHabit:hs)
+                    -- print "Habit " ++ habitName ++ " has been added"
+
+mark :: [String] -> IO ()
+mark [fileName, habitName, date] = do
+    d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
+    case d of
+        Left err -> putStrLn err
+        Right hs -> do
+            let newHabit = Habit { name = habitName, occurences = [] }
+            if newHabit `elem` hs
+                then do
+                    let i = findIndex newHabit hs
+                    let o = occurences (hs !! i) ++ fromJust (fromGregorianValid date)
+                    update i  $ fromList ["bar", "bar", "bar"]
+                    B.writeFile fileName (encode hs')
+                else putStrLn "Create Habit first"
+
 
 getToday :: IO Day
 getToday = utctDay <$> getCurrentTime
@@ -54,5 +87,4 @@ getHabitScore today h = score where
     score = round (100 * sum ds)
 
 getDayScore :: Day -> Day -> Float
-getDayScore d1 d2 = ds where
-    ds = 1 / (5 * fromInteger(1 + diffDays d1 d2))
+getDayScore d1 d2 = 1 / (5 * fromInteger(1 + diffDays d1 d2))
