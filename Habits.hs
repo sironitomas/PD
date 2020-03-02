@@ -1,18 +1,15 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
--- import Data.Text.Encoding
--- import qualified Data.Text as T
--- import System.IO
 import Data.Aeson
 import Data.List
 import Data.Maybe
--- import qualified Data.Sequence
 import Data.Time
 import Data.Time.Calendar
 import GHC.Generics
 import qualified Data.ByteString.Char8 as C8
 import qualified Data.ByteString.Lazy as B
+import qualified Data.Sequence as S
 import System.Directory
 import System.Environment
 
@@ -59,11 +56,11 @@ add [fileName, habitName] = do
             let newHabit = Habit { name = habitName, occurences = [] }
             if newHabit `elem` hs
                 then putStrLn "Habit already exists"
-                else B.writeFile fileName (encode newHabit:hs)
+                else B.writeFile fileName (encode (newHabit:hs))
                     -- print "Habit " ++ habitName ++ " has been added"
 
 mark :: [String] -> IO ()
-mark [fileName, habitName, date] = do
+mark [fileName, habitName, dateStr] = do
     d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
     case d of
         Left err -> putStrLn err
@@ -71,10 +68,12 @@ mark [fileName, habitName, date] = do
             let newHabit = Habit { name = habitName, occurences = [] }
             if newHabit `elem` hs
                 then do
-                    let i = findIndex newHabit hs
-                    let o = occurences (hs !! i) ++ fromJust (fromGregorianValid date)
-                    update i  $ fromList ["bar", "bar", "bar"]
-                    B.writeFile fileName (encode hs')
+                    let i = fromJust (elemIndex newHabit hs)
+                    let date = read dateStr::Day
+                    let o = date : delete date (occurences (hs !! i))
+                    let h = Habit { name = habitName, occurences = o }
+                    let j = h : delete h hs
+                    B.writeFile fileName (encode j)
                 else putStrLn "Create Habit first"
 
 
