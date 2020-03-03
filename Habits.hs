@@ -10,7 +10,6 @@ import Data.Time
 import Data.Time.Calendar
 import GHC.Generics
 import qualified Data.ByteString.Lazy as B
-import qualified Data.Sequence as S
 import System.Directory
 import System.Environment
 import System.IO
@@ -28,7 +27,6 @@ instance Ord Habit where
 
 instance FromJSON Habit
 instance ToJSON Habit
-
 
 handler :: IOError -> IO ()
 handler e
