@@ -59,8 +59,7 @@ view [fileName] = do
         Right hs -> do
             today <- getToday
             let scores = map (getHabitScore today) hs
-            print scores
-            print $ map habitToString hs
+            print $ map habitToString (zip hs scores)
 
 add :: [String] -> IO ()
 add [fileName, habitName] = do
@@ -91,7 +90,6 @@ remove [fileName, habitName] = do
                 Right hs -> if newHabit `elem` hs
                     then B.writeFile fileName (encode (delete newHabit hs))
                     else putStrLn "Habit doesn't exist"
-                            -- print "Habit " ++ habitName ++ " has been added"
         else putStrLn "The file doesn't exist."
 
 mark :: [String] -> IO ()
@@ -122,5 +120,5 @@ getHabitScore today h = score where
 getDayScore :: Day -> Day -> Float
 getDayScore d1 d2 = 1 / (5 * fromInteger(1 + diffDays d1 d2))
 
-habitToString :: Habit -> String
-habitToString h = name h ++ ", " ++ "score: "
+habitToString :: (Habit, Int) -> String
+habitToString (h, s) = name h ++ ": " ++ show s ++ "%"
