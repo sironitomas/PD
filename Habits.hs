@@ -1,24 +1,27 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
+import Control.Exception
 import Data.Aeson
+import Data.Char
 import Data.List
 import Data.Maybe
 import Data.Time
 import Data.Time.Calendar
 import GHC.Generics
-import qualified Data.ByteString.Char8 as C8
 import qualified Data.ByteString.Lazy as B
 import qualified Data.Sequence as S
 import System.Directory
 import System.Environment
+import System.IO
+import System.IO.Error
 
 data Habit = Habit { name :: String
                    , occurences :: [Day]
                    } deriving (Generic, Show)
 
 instance Eq Habit where
-    x == y = name x == name y
+    x == y = map toLower (name x) == map toLower (name y)
 
 instance Ord Habit where
     compare x y = compare (name x) (name y)
@@ -26,7 +29,16 @@ instance Ord Habit where
 instance FromJSON Habit
 instance ToJSON Habit
 
-main = do
+
+handler :: IOError -> IO ()
+handler e
+    | isDoesNotExistError e = putStrLn "The file doesn't exist!"
+    | otherwise = ioError e
+
+main = toTry `catch` handler
+
+toTry :: IO ()
+toTry = do
     (command:args) <- getArgs
     let (Just action) = lookup command dispatch
     action args
@@ -53,15 +65,20 @@ view [fileName] = do
 
 add :: [String] -> IO ()
 add [fileName, habitName] = do
-    d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
-    case d of
-        Left err -> putStrLn err
-        Right hs -> do
-            let newHabit = Habit { name = habitName, occurences = [] }
-            if newHabit `elem` hs
-                then putStrLn "Habit already exists"
-                else B.writeFile fileName (encode (newHabit:hs))
-                    -- print "Habit " ++ habitName ++ " has been added"
+    fileExists <- doesFileExist fileName
+    let newHabit = Habit { name = habitName, occurences = [] }
+    if fileExists
+        then do
+            d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
+            case d of
+                Left err -> putStrLn err
+                Right hs -> if newHabit `elem` hs
+                    then putStrLn "Habit already exists"
+                    else B.writeFile fileName (encode (newHabit:hs))
+                            -- print "Habit " ++ habitName ++ " has been added"
+        else do
+            putStrLn "The file doesn't exist, creating new one..."
+            B.writeFile fileName (encode [newHabit])
 
 mark :: [String] -> IO ()
 mark [fileName, habitName, dateStr] = do
