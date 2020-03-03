@@ -45,7 +45,11 @@ view [fileName] = do
     d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
     case d of
         Left err -> putStrLn err
-        Right hs -> print hs
+        Right hs -> do
+            today <- getToday
+            let scores = map (getHabitScore today) hs
+            print scores
+            print $ map habitToString hs
 
 add :: [String] -> IO ()
 add [fileName, habitName] = do
@@ -76,7 +80,6 @@ mark [fileName, habitName, dateStr] = do
                     B.writeFile fileName (encode j)
                 else putStrLn "Create Habit first"
 
-
 getToday :: IO Day
 getToday = utctDay <$> getCurrentTime
 
@@ -87,3 +90,6 @@ getHabitScore today h = score where
 
 getDayScore :: Day -> Day -> Float
 getDayScore d1 d2 = 1 / (5 * fromInteger(1 + diffDays d1 d2))
+
+habitToString :: Habit -> String
+habitToString h = name h ++ ", " ++ "score: "
