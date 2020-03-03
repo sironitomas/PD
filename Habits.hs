@@ -47,6 +47,7 @@ getJSON = B.readFile
 dispatch :: [(String, [String] -> IO ())]
 dispatch =  [ ("view", view)
             , ("add", add)
+            , ("remove", remove)
             , ("mark", mark)
             ]
 
@@ -77,6 +78,21 @@ add [fileName, habitName] = do
         else do
             putStrLn "The file doesn't exist, creating new one..."
             B.writeFile fileName (encode [newHabit])
+
+remove :: [String] -> IO ()
+remove [fileName, habitName] = do
+    fileExists <- doesFileExist fileName
+    let newHabit = Habit { name = habitName, occurences = [] }
+    if fileExists
+        then do
+            d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
+            case d of
+                Left err -> putStrLn err
+                Right hs -> if newHabit `elem` hs
+                    then B.writeFile fileName (encode (delete newHabit hs))
+                    else putStrLn "Habit doesn't exist"
+                            -- print "Habit " ++ habitName ++ " has been added"
+        else putStrLn "The file doesn't exist."
 
 mark :: [String] -> IO ()
 mark [fileName, habitName, dateStr] = do
