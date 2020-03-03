@@ -1,13 +1,13 @@
 name:                Habits
 version:             0.1.0.0
-github:              "githubuser/Habits"
-license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2020 Author name here"
+github:              "sironitomas/PD"
+license:             GPL3
+author:              "Tomas Sironi"
+maintainer:          "sironitomas@gmail.com"
+copyright:           "2020 Tomas Sironi"
 
 extra-source-files:
-- README.md
+- ../README.md
 - ChangeLog.md
 
 # Metadata used when publishing your package

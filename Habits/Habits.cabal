@@ -4,21 +4,21 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7bbd18795409b1483eac52e51b0c7fb3a50e43d162c060aa89e4abe695d1ee9b
+-- hash: aa2f2193ddf3b1e63c6a96865bdd0299c62d65d36b667568a0d9283d133cfc99
 
 name:           Habits
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/sironitomas/PD#readme>
+description:    Please see the README on GitHub at <https://github.com/githubuser/Habits#readme>
 homepage:       https://github.com/sironitomas/PD#readme
 bug-reports:    https://github.com/sironitomas/PD/issues
 author:         Tomas Sironi
 maintainer:     sironitomas@gmail.com
 copyright:      2020 Tomas Sironi
-license:        gpl-3.0
+license:        GPL3
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
-    README.md
+    ../README.md
     ChangeLog.md
 
 source-repository head
