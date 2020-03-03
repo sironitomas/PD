@@ -2,6 +2,8 @@
 
 ## How to use
 
-    ./habits add habits.json Run
-    ./habits mark habits.json Run 2020-02-28
-    ./habits view habits.json
+    cd Habits/
+    stack build
+    stack exec Habits-exe add habits.json Run
+    stack exec Habits-exe mark habits.json Run 2020-02-28
+    stack exec Habits-exe view habits.json
