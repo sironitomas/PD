@@ -35,3 +35,11 @@ You need to have [haskellstack.org](http://haskellstack.org) installed. Then, cl
 
     # stack ghc -- --version
     The Glorious Glasgow Haskell Compilation System, version 8.8.2
+
+## Resources used
+
+    - https://www.schoolofhaskell.com/
+    - http://learnyouahaskell.com/
+    - wiki.haskell.org/
+    - https://www.schoolofhaskell.com/school/starting-with-haskell/libraries-and-frameworks/text-manipulation/json
+    - https://hackage.haskell.org/package/aeson-1.4.6.0/docs/Data-Aeson.html
