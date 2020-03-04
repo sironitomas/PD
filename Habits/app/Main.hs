@@ -75,8 +75,8 @@ add [fileName, habitName] = do
                     else B.writeFile fileName (encode (newHabit:hs))
                             -- print "Habit " ++ habitName ++ " has been added"
         else do
-            putStrLn "The file doesn't exist, creating new one..."
             B.writeFile fileName (encode [newHabit])
+            putStrLn "The file doesn't exist, created a new one with the habit."
 
 remove :: [String] -> IO ()
 remove [fileName, habitName] = do
@@ -107,7 +107,7 @@ mark [fileName, habitName, dateStr] = do
                     let h = Habit { name = habitName, occurences = o }
                     let j = h : delete h hs
                     B.writeFile fileName (encode j)
-                else putStrLn "Create Habit first"
+                else putStrLn "Please, add the Habit first"
 
 getToday :: IO Day
 getToday = utctDay <$> getCurrentTime
@@ -115,10 +115,15 @@ getToday = utctDay <$> getCurrentTime
 getHabitScore :: Day -> Habit -> Int
 getHabitScore today h = score where
     ds = Prelude.map (getDayScore today) (occurences h)
-    score = round (100 * sum ds)
+    score = safeScore (round (100 * sum ds))
+
+safeScore :: Int -> Int
+safeScore s
+    | s >= 100 = 100
+    | otherwise = s
 
 getDayScore :: Day -> Day -> Float
-getDayScore d1 d2 = 1 / (5 * fromInteger(1 + diffDays d1 d2))
+getDayScore d1 d2 = 1 / (3 * fromInteger(1 + diffDays d1 d2))
 
 habitToString :: (Habit, Int) -> String
 habitToString (h, s) = name h ++ ": " ++ show s ++ "%"
