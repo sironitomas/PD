@@ -30,3 +30,8 @@ You need to have [haskellstack.org](http://haskellstack.org) installed. Then, cl
 ### Remove an habit
 
     stack exec Habits-exe remove habits.json Meditate
+
+## GHC Version info
+
+    # stack ghc -- --version
+    The Glorious Glasgow Haskell Compilation System, version 8.8.2

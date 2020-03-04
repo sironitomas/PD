@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: aa2f2193ddf3b1e63c6a96865bdd0299c62d65d36b667568a0d9283d133cfc99
+-- hash: 15002ae6ed962743c2de5ee227ce2369b5f9333fe417318aaa1f97c196625e5b
 
 name:           Habits
 version:        0.1.0.0
@@ -15,7 +15,6 @@ author:         Tomas Sironi
 maintainer:     sironitomas@gmail.com
 copyright:      2020 Tomas Sironi
 license:        GPL3
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     ../README.md
