@@ -56,10 +56,10 @@ view [fileName] = do
     d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
     case d of
         Left err -> putStrLn err
-        Right hs -> do
+        Right habits -> do
             today <- getToday
-            let scores = map (getHabitScore today) hs
-            print $ map habitToString (zip hs scores)
+            let scores = map (getHabitScore today) habits
+            print $ map habitToString (zip habits scores)
 
 add :: [String] -> IO ()
 add [fileName, habitName] = do
@@ -70,9 +70,9 @@ add [fileName, habitName] = do
             d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
             case d of
                 Left err -> putStrLn err
-                Right hs -> if newHabit `elem` hs
+                Right habits -> if newHabit `elem` habits
                     then putStrLn "Habit already exists"
-                    else B.writeFile fileName (encode (newHabit:hs))
+                    else B.writeFile fileName (encode (newHabit:habits))
                             -- print "Habit " ++ habitName ++ " has been added"
         else do
             B.writeFile fileName (encode [newHabit])
@@ -87,8 +87,8 @@ remove [fileName, habitName] = do
             d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
             case d of
                 Left err -> putStrLn err
-                Right hs -> if newHabit `elem` hs
-                    then B.writeFile fileName (encode (delete newHabit hs))
+                Right habits -> if newHabit `elem` habits
+                    then B.writeFile fileName (encode (delete newHabit habits))
                     else putStrLn "Habit doesn't exist"
         else putStrLn "The file doesn't exist."
 
@@ -97,15 +97,15 @@ mark [fileName, habitName, dateStr] = do
     d <- (eitherDecode <$> getJSON fileName) :: IO (Either String [Habit])
     case d of
         Left err -> putStrLn err
-        Right hs -> do
+        Right habits -> do
             let newHabit = Habit { name = habitName, occurences = [] }
-            if newHabit `elem` hs
+            if newHabit `elem` habits
                 then do
-                    let i = fromJust (elemIndex newHabit hs)
+                    let i = fromJust (elemIndex newHabit habits)
                     let date = read dateStr::Day
-                    let o = date : delete date (occurences (hs !! i))
+                    let o = date : delete date (occurences (habits !! i))
                     let h = Habit { name = habitName, occurences = o }
-                    let j = h : delete h hs
+                    let j = h : delete h habits
                     B.writeFile fileName (encode j)
                 else putStrLn "Please, add the Habit first"
 
